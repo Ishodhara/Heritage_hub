@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login/Signup - Antique Hub Marketplace</title>
+    <title>Login/Signup - Ceylon Antique Marketplace</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <style>
         * {
             margin: 0;
@@ -20,7 +19,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1c1c1c, #2c2c2c);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             position: relative;
         }
 
@@ -29,8 +28,8 @@
             width: 850px;
             height: 550px;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            background: #ffffff;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            background: white;
             overflow: hidden;
         }
 
@@ -70,7 +69,7 @@
 
         .form-box h1 {
             font-size: 32px;
-            color: #b8963e;
+            color: #333;
             text-align: center;
             margin-bottom: 20px;
         }
@@ -91,8 +90,8 @@
         }
 
         .input-box input:focus {
-            border-color: #b8963e;
-            box-shadow: 0 0 10px rgba(184,150,62,0.5);
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
         }
 
         .input-box i {
@@ -109,7 +108,7 @@
             height: 45px;
             border: none;
             border-radius: 8px;
-            background: #b8963e;
+            background: #667eea;
             color: white;
             font-size: 16px;
             font-weight: 500;
@@ -119,7 +118,7 @@
         }
 
         .btn:hover {
-            background: #a3832f;
+            background: #5a6fd8;
         }
 
         .btn:disabled {
@@ -152,8 +151,8 @@
             align-items: center;
             padding: 0 40px;
             text-align: center;
-            background: linear-gradient(135deg, #2b2b2b, #1c1c1c);
-            color: #f5f5f5;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             transition: 0.6s;
         }
 
@@ -177,7 +176,6 @@
         .toggle-panel h1 {
             font-size: 32px;
             margin-bottom: 20px;
-            color: #d4af37;
         }
 
         .toggle-panel p {
@@ -187,12 +185,12 @@
         .toggle-panel .btn {
             width: 150px;
             background: transparent;
-            border: 2px solid #d4af37;
+            border: 2px solid white;
         }
 
         .toggle-panel .btn:hover {
-            background: #d4af37;
-            color: #1c1c1c;
+            background: white;
+            color: #667eea;
         }
 
         .loading {
@@ -266,259 +264,259 @@
 </div>
 
 <script>
-    function showSuccess(message) {
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: message,
-            timer: 2000,
-            showConfirmButton: false
+  function showSuccess(message) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: message,
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
+
+  function showError(message) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: message,
+      timer: 3000
+    });
+  }
+
+  const container = document.querySelector('.container');
+  const registerBtn = document.querySelector('.register-btn');
+  const loginBtn = document.querySelector('.login-btn');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const loginButton = document.getElementById('loginBtn');
+  const registerButton = document.getElementById('registerBtn');
+
+  const possibleBackendUrls = [
+    'http://localhost:8080',
+    'http://127.0.0.1:8080'
+  ];
+
+  let API_BASE_URL = possibleBackendUrls[0];
+
+  registerBtn.addEventListener('click', () => container.classList.add('active'));
+  loginBtn.addEventListener('click', () => container.classList.remove('active'));
+
+  const toggleIcons = document.querySelectorAll('.togglePassword');
+  toggleIcons.forEach(icon => {
+    icon.addEventListener('click', () => {
+      const input = document.getElementById(icon.dataset.target);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove('bx-hide');
+        icon.classList.add('bx-show');
+      } else {
+        input.type = "password";
+        icon.classList.remove('bx-show');
+        icon.classList.add('bx-hide');
+      }
+    });
+  });
+
+  function setCookie(name, value, daysToExpire) {
+    const date = new Date();
+    date.setTime(date.getTime() + (daysToExpire * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+  }
+
+  function setLoading(button, isLoading) {
+    if (isLoading) {
+      button.disabled = true;
+      button.innerHTML = `<span class="loading"></span> Processing...`;
+    } else {
+      button.disabled = false;
+      button.textContent = button.id === 'loginBtn' ? 'Login' : 'Register';
+    }
+  }
+
+  async function getUserRole(token) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/check-role`, {
+        headers: {'Authorization': `Bearer ${token}`}
+      });
+
+      const response2 = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {'Authorization': `Bearer ${token}`}
+      });
+
+      if (response2.ok) {
+        const data2 = await response2.json();
+        console.log(data2);
+        sessionStorage.setItem('user', JSON.stringify(data2.data));
+        // return data.data;
+      }
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
+      }
+
+
+      return "USER";
+    } catch (error) {
+      console.error('Role check failed:', error);
+      return "USER";
+    }
+  }
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    if (!username || !password) {
+      showError('Please fill all fields!');
+      return;
+    }
+
+    setLoading(loginButton, true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({username, password})
+      });
+
+      const responseData = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(responseData);
+        console.log({data})
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', responseData);
+        throw new Error('Server returned invalid response');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || `Login failed (Status: ${response.status})`);
+      }
+
+      const token = data.data.accessToken;
+      setCookie("token", token, 7);
+
+      // Get user role from backend
+      const role = await getUserRole(token);
+
+      showSuccess('Login successful!');
+      setTimeout(() => {
+        window.location.href = role === "ADMIN" ? "adminDashboard.html" : "buyerHome.html";
+      }, 1500);
+
+    } catch (error) {
+      showError(error.message);
+      console.error('Login error:', error);
+    } finally {
+      setLoading(loginButton, false);
+    }
+  });
+
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('registerUsername').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value.trim();
+
+    if (!username || !email || !password) {
+      showError('Please fill all fields!');
+      return;
+    }
+    if (password.length < 5) {
+      showError('Password must be at least 5 characters!');
+      return;
+    }
+
+    setLoading(registerButton, true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/user/adduser`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({username, email, password, role: "USER"})
+      });
+
+      const responseData = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(responseData);
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', responseData);
+        throw new Error('Server returned invalid response');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || `Registration failed (Status: ${response.status})`);
+      }
+
+      showSuccess('Registration successful! Please login.');
+      setTimeout(() => {
+        container.classList.remove('active');
+        registerForm.reset();
+      }, 1500);
+
+    } catch (error) {
+      showError(error.message);
+    } finally {
+      setLoading(registerButton, false);
+    }
+  });
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  async function checkAuthStatus() {
+    const token = getCookie('token');
+    if (token) {
+      try {
+        const role = await getUserRole(token);
+        window.location.href = role === "ADMIN" ? "adminDashboard.html" : "buyerHome.html";
+      } catch (error) {
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      }
+    }
+  }
+
+  async function testBackendConnection() {
+    for (const url of possibleBackendUrls) {
+      try {
+        const response = await fetch(`${url}/auth/login`, {
+          method: 'OPTIONS',
+          headers: {
+            'Accept': 'application/json'
+          }
         });
+
+        if (response.ok) {
+          API_BASE_URL = url;
+          return true;
+        }
+      } catch (error) {
+        console.log(`Failed to connect to ${url}`);
+      }
     }
 
-    function showError(message) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: message,
-            timer: 3000
-        });
-    }
+    showError('Cannot connect to backend server. Please make sure it is running.');
+    return false;
+  }
 
-    const container = document.querySelector('.container');
-    const registerBtn = document.querySelector('.register-btn');
-    const loginBtn = document.querySelector('.login-btn');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const loginButton = document.getElementById('loginBtn');
-    const registerButton = document.getElementById('registerBtn');
-
-    const possibleBackendUrls = [
-        'http://localhost:8080',
-        'http://127.0.0.1:8080'
-    ];
-
-    let API_BASE_URL = possibleBackendUrls[0];
-
-    registerBtn.addEventListener('click', () => container.classList.add('active'));
-    loginBtn.addEventListener('click', () => container.classList.remove('active'));
-
-    const toggleIcons = document.querySelectorAll('.togglePassword');
-    toggleIcons.forEach(icon => {
-        icon.addEventListener('click', () => {
-            const input = document.getElementById(icon.dataset.target);
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove('bx-hide');
-                icon.classList.add('bx-show');
-            } else {
-                input.type = "password";
-                icon.classList.remove('bx-show');
-                icon.classList.add('bx-hide');
-            }
-        });
-    });
-
-    function setCookie(name, value, daysToExpire) {
-        const date = new Date();
-        date.setTime(date.getTime() + (daysToExpire * 24 * 60 * 60 * 1000));
-        document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
-    }
-
-    function setLoading(button, isLoading) {
-        if (isLoading) {
-            button.disabled = true;
-            button.innerHTML = `<span class="loading"></span> Processing...`;
-        } else {
-            button.disabled = false;
-            button.textContent = button.id === 'loginBtn' ? 'Login' : 'Register';
-        }
-    }
-
-    async function getUserRole(token) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/check-role`, {
-                headers: {'Authorization': `Bearer ${token}`}
-            });
-
-            const response2 = await fetch(`${API_BASE_URL}/auth/me`, {
-                headers: {'Authorization': `Bearer ${token}`}
-            });
-
-            if (response2.ok) {
-                const data2 = await response2.json();
-                console.log(data2);
-                sessionStorage.setItem('user', JSON.stringify(data2.data));
-                // return data.data;
-            }
-            if (response.ok) {
-                const data = await response.json();
-                return data.data;
-            }
-
-
-            return "USER";
-        } catch (error) {
-            console.error('Role check failed:', error);
-            return "USER";
-        }
-    }
-
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
-
-        if (!username || !password) {
-            showError('Please fill all fields!');
-            return;
-        }
-
-        setLoading(loginButton, true);
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({username, password})
-            });
-
-            const responseData = await response.text();
-            let data;
-
-            try {
-                data = JSON.parse(responseData);
-                console.log({data})
-            } catch (e) {
-                console.error('Failed to parse response as JSON:', responseData);
-                throw new Error('Server returned invalid response');
-            }
-
-            if (!response.ok) {
-                throw new Error(data.message || `Login failed (Status: ${response.status})`);
-            }
-
-            const token = data.data.accessToken;
-            setCookie("token", token, 7);
-
-            // Get user role from backend
-            const role = await getUserRole(token);
-
-            showSuccess('Login successful!');
-            setTimeout(() => {
-                window.location.href = role === "ADMIN" ? "adminDashboard.html" : "buyerHome.html";
-            }, 1500);
-
-        } catch (error) {
-            showError(error.message);
-            console.error('Login error:', error);
-        } finally {
-            setLoading(loginButton, false);
-        }
-    });
-
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('registerUsername').value.trim();
-        const email = document.getElementById('registerEmail').value.trim();
-        const password = document.getElementById('registerPassword').value.trim();
-
-        if (!username || !email || !password) {
-            showError('Please fill all fields!');
-            return;
-        }
-        if (password.length < 5) {
-            showError('Password must be at least 5 characters!');
-            return;
-        }
-
-        setLoading(registerButton, true);
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/v1/user/adduser`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({username, email, password, role: "USER"})
-            });
-
-            const responseData = await response.text();
-            let data;
-
-            try {
-                data = JSON.parse(responseData);
-            } catch (e) {
-                console.error('Failed to parse response as JSON:', responseData);
-                throw new Error('Server returned invalid response');
-            }
-
-            if (!response.ok) {
-                throw new Error(data.message || `Registration failed (Status: ${response.status})`);
-            }
-
-            showSuccess('Registration successful! Please login.');
-            setTimeout(() => {
-                container.classList.remove('active');
-                registerForm.reset();
-            }, 1500);
-
-        } catch (error) {
-            showError(error.message);
-        } finally {
-            setLoading(registerButton, false);
-        }
-    });
-
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    async function checkAuthStatus() {
-        const token = getCookie('token');
-        if (token) {
-            try {
-                const role = await getUserRole(token);
-                window.location.href = role === "ADMIN" ? "adminDashboard.html" : "buyerHome.html";
-            } catch (error) {
-                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            }
-        }
-    }
-
-    async function testBackendConnection() {
-        for (const url of possibleBackendUrls) {
-            try {
-                const response = await fetch(`${url}/auth/login`, {
-                    method: 'OPTIONS',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    API_BASE_URL = url;
-                    return true;
-                }
-            } catch (error) {
-                console.log(`Failed to connect to ${url}`);
-            }
-        }
-
-        showError('Cannot connect to backend server. Please make sure it is running.');
-        return false;
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        await testBackendConnection();
-        checkAuthStatus();
-    });
+  document.addEventListener('DOMContentLoaded', async () => {
+    await testBackendConnection();
+    checkAuthStatus();
+  });
 </script>
 </body>
 </html>
