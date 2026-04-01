@@ -1,4 +1,4 @@
-package lk.ijse.heritage_hub;
+package lk.ijse.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
